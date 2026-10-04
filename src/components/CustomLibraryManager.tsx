@@ -10,10 +10,12 @@ import {
   Quote,
   Check,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  Upload
 } from 'lucide-react';
 import { CustomText } from '../types';
 import { FAMOUS_QUOTES, CODE_SNIPPETS } from '../data/textLibraries';
+import { CustomTextModal } from './CustomTextModal';
 
 interface CustomLibraryManagerProps {
   customTexts: CustomText[];
@@ -30,6 +32,7 @@ export const CustomLibraryManager: React.FC<CustomLibraryManagerProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'custom' | 'quotes' | 'code'>('custom');
   const [isCreating, setIsCreating] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [validationError, setValidationError] = useState('');
@@ -74,16 +77,26 @@ export const CustomLibraryManager: React.FC<CustomLibraryManagerProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setIsCreating(!isCreating);
-            setValidationError('');
-          }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs font-mono transition-all shadow-md"
-        >
-          <Plus className="w-4 h-4" />
-          {isCreating ? 'Cancel' : 'New Custom Text'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsPdfModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs font-mono transition-all border border-slate-700/80 shadow-md hover:border-amber-400/50"
+          >
+            <Upload className="w-4 h-4" />
+            Upload PDF
+          </button>
+
+          <button
+            onClick={() => {
+              setIsCreating(!isCreating);
+              setValidationError('');
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs font-mono transition-all shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+            {isCreating ? 'Cancel' : 'New Custom Text'}
+          </button>
+        </div>
       </div>
 
       {/* Library Category Navigation */}
@@ -335,6 +348,17 @@ export const CustomLibraryManager: React.FC<CustomLibraryManagerProps> = ({
           ))}
         </div>
       )}
+
+      {/* Upload PDF / Document Modal */}
+      <CustomTextModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        savedTexts={customTexts}
+        onSaveToLibrary={onAddCustomText}
+        onLoadTextForPractice={(content, title) => {
+          onSelectForPractice(content, title);
+        }}
+      />
     </div>
   );
 };

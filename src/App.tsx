@@ -206,9 +206,16 @@ function MainApp() {
                   onComplete={handleTestComplete}
                   settings={settings}
                   customTextOverride={customPracticeText}
+                  customTextTitle={customPracticeTitle}
                   onClearCustomOverride={() => {
                     setCustomPracticeText(null);
                     setCustomPracticeTitle(null);
+                  }}
+                  savedCustomTexts={customTexts}
+                  onAddCustomText={handleAddCustomText}
+                  onLoadCustomText={(content, title) => {
+                    setCustomPracticeText(content);
+                    setCustomPracticeTitle(title);
                   }}
                 />
               </div>

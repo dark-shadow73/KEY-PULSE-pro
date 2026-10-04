@@ -1,7 +1,7 @@
 export const COMMON_WORDS: string[] = [
-  'the', 'be', 'of', 'and', 'a', 'to', 'in', 'he', 'have', 'it', 'that', 'for', 'they', 'I',
-  'with', 'as', 'not', 'on', 'she', 'at', 'by', 'this', 'we', 'you', 'do', 'but', 'his', 'by',
-  'from', 'they', 'say', 'her', 'she', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there',
+  'the', 'be', 'of', 'and', 'a', 'to', 'in', 'he', 'have', 'it', 'that', 'for', 'they',
+  'with', 'as', 'not', 'on', 'she', 'at', 'by', 'this', 'we', 'you', 'do', 'but', 'his',
+  'from', 'they', 'say', 'her', 'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there',
   'their', 'what', 'so', 'up', 'out', 'if', 'about', 'who', 'get', 'which', 'go', 'me', 'when',
   'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know', 'take', 'people', 'into', 'year',
   'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than', 'then', 'now', 'look', 'only',
@@ -9,12 +9,27 @@ export const COMMON_WORDS: string[] = [
   'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most',
   'us', 'great', 'world', 'here', 'life', 'never', 'much', 'should', 'need', 'feel', 'high',
   'system', 'program', 'code', 'speed', 'focus', 'flow', 'finger', 'rhythm', 'key', 'type',
-  'practice', 'quick', 'brown', 'fox', 'jumps', 'over', 'lazy', 'dog', 'sound', 'light', 'dark',
+  'practice', 'quick', 'brown', 'fox', 'jumps', 'lazy', 'dog', 'sound', 'light', 'dark',
   'screen', 'mind', 'power', 'future', 'skill', 'learn', 'stream', 'pulse', 'spark', 'shift',
   'energy', 'build', 'create', 'reach', 'climb', 'quiet', 'swift', 'sharp', 'steady', 'drive',
-  'matrix', 'signal', 'memory', 'future', 'vision', 'simple', 'clean', 'nature', 'water', 'stone',
+  'matrix', 'signal', 'memory', 'vision', 'simple', 'clean', 'nature', 'water', 'stone',
   'mountain', 'breeze', 'cloud', 'silver', 'golden', 'shadow', 'echo', 'bright', 'calm', 'depth',
-  'journey', 'wonder', 'curious', 'action', 'result', 'target', 'motion', 'orbit', 'zenith', 'tempo'
+  'journey', 'wonder', 'curious', 'action', 'result', 'target', 'motion', 'orbit', 'zenith', 'tempo',
+  'balance', 'clarity', 'crystal', 'flight', 'forest', 'galaxy', 'harbor', 'horizon', 'island',
+  'jungle', 'knight', 'legend', 'meadow', 'nebula', 'ocean', 'path', 'planet', 'portal',
+  'quest', 'radar', 'river', 'rocket', 'sensor', 'serene', 'shelter', 'spiral', 'spring',
+  'stellar', 'summit', 'temple', 'thunder', 'timber', 'trail', 'valley', 'vessel', 'voyage',
+  'wave', 'whisper', 'winter', 'wisdom', 'wizard', 'zen', 'beacon', 'bounty', 'canvas',
+  'canyon', 'castle', 'chimera', 'circuit', 'comet', 'compass', 'cradle', 'creek', 'dawn',
+  'delta', 'desert', 'domain', 'dragon', 'dune', 'ember', 'falcon', 'fathom', 'feather',
+  'flame', 'glacier', 'glimmer', 'grove', 'haven', 'hollow', 'lagoon', 'lantern', 'lunar',
+  'magma', 'mantle', 'meteor', 'mirage', 'oasis', 'onyx', 'panther', 'pebble', 'phoenix',
+  'prism', 'quartz', 'radian', 'raptor', 'realm', 'relic', 'ridge', 'ruby', 'safari',
+  'sapphire', 'shadow', 'shrine', 'siren', 'solace', 'solitude', 'sparkle', 'spectrum',
+  'strata', 'stream', 'stride', 'tesseract', 'tide', 'titan', 'tundra', 'twilight', 'vanguard',
+  'vortex', 'wilderness', 'wind', 'zephyr', 'always', 'between', 'change', 'different',
+  'example', 'family', 'group', 'important', 'keep', 'large', 'move', 'number', 'point',
+  'question', 'right', 'school', 'small', 'story', 'together', 'under', 'water', 'young'
 ];
 
 export interface QuoteItem {

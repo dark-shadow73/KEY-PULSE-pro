@@ -9,7 +9,8 @@ import {
   Zap,
   Target,
   Gauge,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from 'lucide-react';
 import {
   TestMode,
@@ -18,7 +19,8 @@ import {
   TextCategory,
   TypingSession,
   SecondTelemetry,
-  AppSettings
+  AppSettings,
+  CustomText
 } from '../types';
 import {
   generateRandomWords,
@@ -28,25 +30,36 @@ import {
 } from '../data/textLibraries';
 import { THEMES } from '../data/themes';
 import { soundSynth } from '../utils/audio';
+import { CustomTextModal } from './CustomTextModal';
 
 interface TypingArenaProps {
   onComplete: (session: TypingSession) => void;
   settings: AppSettings;
   customTextOverride?: string | null;
+  customTextTitle?: string | null;
   onClearCustomOverride?: () => void;
+  savedCustomTexts?: CustomText[];
+  onAddCustomText?: (text: CustomText) => void;
+  onLoadCustomText?: (content: string, title: string) => void;
 }
 
 export const TypingArena: React.FC<TypingArenaProps> = ({
   onComplete,
   settings,
   customTextOverride,
-  onClearCustomOverride
+  customTextTitle,
+  onClearCustomOverride,
+  savedCustomTexts = [],
+  onAddCustomText,
+  onLoadCustomText
 }) => {
   // Test configuration
   const [mode, setMode] = useState<TestMode>('time');
   const [timeOption, setTimeOption] = useState<TimeOption>(30);
   const [wordOption, setWordOption] = useState<WordOption>(50);
   const [category, setCategory] = useState<TextCategory>('common-words');
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [currentCustomTitle, setCurrentCustomTitle] = useState<string | null>(customTextTitle || null);
 
   // Text state
   const [targetText, setTargetText] = useState<string>('');
@@ -95,19 +108,80 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
   const timerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const arenaContainerRef = useRef<HTMLDivElement | null>(null);
+  const activeCaretRef = useRef<HTMLSpanElement | null>(null);
 
   const theme = THEMES[settings.theme] || THEMES.midnight;
+
+  // Auto-scroll the arena so active line stays comfortably in view
+  useEffect(() => {
+    if (activeCaretRef.current && arenaContainerRef.current) {
+      const caret = activeCaretRef.current;
+      const container = arenaContainerRef.current;
+      const caretTop = caret.offsetTop;
+      const containerHeight = container.clientHeight;
+
+      if (caretTop > containerHeight * 0.4) {
+        container.scrollTo({
+          top: caretTop - containerHeight * 0.35,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [typedText]);
 
   useEffect(() => {
     if (customTextOverride) {
       setMode('custom');
+      if (customTextTitle) {
+        setCurrentCustomTitle(customTextTitle);
+      }
     }
-  }, [customTextOverride]);
+  }, [customTextOverride, customTextTitle]);
+
+  const handleLoadCustomText = (content: string, title: string) => {
+    setMode('custom');
+    setCurrentCustomTitle(title);
+    setTargetText(content.trim());
+    targetTextRef.current = content.trim();
+    setTypedText('');
+    typedTextRef.current = '';
+    setIsRunning(false);
+    isRunningRef.current = false;
+    setIsFinished(false);
+    isFinishedRef.current = false;
+    setTimeLeft(0);
+    timeLeftRef.current = 0;
+    setElapsedTime(0);
+    elapsedTimeRef.current = 0;
+    setCurrentWpm(0);
+    setCurrentCpm(0);
+    setCurrentRawWpm(0);
+    setCurrentAccuracy(100);
+    setErrorCount(0);
+    errorCountRef.current = 0;
+    telemetryHistoryRef.current = [];
+    missedCharsRef.current = {};
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (onLoadCustomText) {
+      onLoadCustomText(content, title);
+    }
+
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+  };
 
   // Initialize or reset text
   const setupNewText = useCallback(() => {
     let text = '';
-    if (customTextOverride) {
+    if (mode === 'custom' && targetTextRef.current) {
+      text = targetTextRef.current;
+    } else if (customTextOverride) {
       text = customTextOverride.trim();
     } else if (mode === 'quote') {
       text = getRandomQuote().quote;
@@ -313,6 +387,18 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
     setCurrentRawWpm(liveRaw);
     setCurrentAccuracy(liveAccuracy);
 
+    // Automatic new word streaming: as the typist approaches the end of text in Time mode,
+    // automatically append fresh words so the user can type endlessly without ever running out!
+    if (mode === 'time') {
+      const remainingChars = targetTextRef.current.length - val.length;
+      if (remainingChars < 70) {
+        const additionalWords = generateRandomWords(35);
+        const updatedTarget = targetTextRef.current + ' ' + additionalWords;
+        targetTextRef.current = updatedTarget;
+        setTargetText(updatedTarget);
+      }
+    }
+
     // End condition for words, quote, or custom mode
     if (mode !== 'time' && val.length >= targetText.length) {
       finishTest();
@@ -330,35 +416,93 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
     inputRef.current?.focus();
   };
 
-  // Render character spans with precise styling
+  // Render character spans with guaranteed visible spaces and clean word boundaries
   const renderCharacters = () => {
-    const chars = targetText.split('');
-    const typedChars = typedText.split('');
+    const lines = targetText.split('\n');
+    let globalIndex = 0;
 
-    return chars.map((char, index) => {
-      const isTyped = index < typedChars.length;
-      const isCurrent = index === typedChars.length;
-      const isCorrect = isTyped && typedChars[index] === char;
+    return lines.map((lineStr, lineIdx) => {
+      const isLastLine = lineIdx === lines.length - 1;
+      const words = lineStr.split(' ');
 
-      let charClass = theme.textMuted;
-      if (isTyped) {
-        charClass = isCorrect ? theme.correct : theme.incorrect;
+      const renderedWords = words.map((wordStr, wordIdx) => {
+        const isLastWordInLine = wordIdx === words.length - 1;
+
+        // Render characters of this word
+        const charElements = wordStr.split('').map((char) => {
+          const charIndex = globalIndex++;
+          const isTyped = charIndex < typedText.length;
+          const isCurrent = charIndex === typedText.length;
+          const isCorrect = isTyped && typedText[charIndex] === char;
+
+          let charClass = theme.textMuted;
+          if (isTyped) {
+            charClass = isCorrect ? theme.correct : theme.incorrect;
+          }
+
+          return (
+            <span
+              key={`char-${charIndex}`}
+              className={`relative inline-block transition-colors duration-75 ${charClass}`}
+            >
+              {isCurrent && (
+                <span
+                  ref={activeCaretRef}
+                  className={`absolute left-0 bottom-0 top-0 w-[2.5px] ${theme.caret} animate-pulse pointer-events-none rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]`}
+                />
+              )}
+              {char}
+            </span>
+          );
+        });
+
+        // Explicit space between words with guaranteed visible width and error indicator
+        let spaceElement = null;
+        if (!isLastWordInLine) {
+          const spaceIndex = globalIndex++;
+          const isSpaceTyped = spaceIndex < typedText.length;
+          const isSpaceCurrent = spaceIndex === typedText.length;
+          const isSpaceCorrect = isSpaceTyped && typedText[spaceIndex] === ' ';
+
+          let spaceClass = theme.textMuted;
+          if (isSpaceTyped) {
+            spaceClass = isSpaceCorrect ? theme.correct : 'bg-rose-500/30 text-rose-400 rounded-sm';
+          }
+
+          spaceElement = (
+            <span
+              key={`space-${spaceIndex}`}
+              className={`relative inline-block w-[0.55em] text-center select-none ${spaceClass}`}
+            >
+              {isSpaceCurrent && (
+                <span
+                  ref={activeCaretRef}
+                  className={`absolute left-0 bottom-0 top-0 w-[2.5px] ${theme.caret} animate-pulse pointer-events-none rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]`}
+                />
+              )}
+              {isSpaceTyped && !isSpaceCorrect ? '·' : '\u00A0'}
+            </span>
+          );
+        }
+
+        return (
+          <span key={`w-${lineIdx}-${wordIdx}`} className="inline-block whitespace-nowrap">
+            {charElements}
+            {spaceElement}
+          </span>
+        );
+      });
+
+      // Advance globalIndex for newline if not last line
+      if (!isLastLine) {
+        globalIndex++;
       }
 
       return (
-        <span
-          key={index}
-          className={`relative inline-block transition-colors duration-75 ${charClass} ${
-            char === ' ' && !isCorrect && isTyped ? 'bg-rose-500/20 rounded' : ''
-          }`}
-        >
-          {isCurrent && (
-            <span
-              className={`absolute left-0 bottom-0 top-0 w-[2px] ${theme.caret} animate-pulse pointer-events-none rounded-full`}
-            />
-          )}
-          {char === '\n' ? <br /> : char}
-        </span>
+        <React.Fragment key={`line-${lineIdx}`}>
+          {renderedWords}
+          {!isLastLine && <br />}
+        </React.Fragment>
       );
     });
   };
@@ -411,10 +555,34 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
             <Quote className="w-3.5 h-3.5" />
             Quotes
           </button>
+          <button
+            onClick={() => setIsCustomModalOpen(true)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-medium transition-all ${
+              mode === 'custom'
+                ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+            }`}
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Custom / PDF
+          </button>
         </div>
 
         {/* Dynamic sub-options based on mode */}
         <div className="flex items-center gap-1 font-mono">
+          {mode === 'custom' && (
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono text-amber-400 font-semibold truncate max-w-[150px] sm:max-w-xs">
+                📄 {currentCustomTitle || 'Custom Practice Text'}
+              </span>
+              <button
+                onClick={() => setIsCustomModalOpen(true)}
+                className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 text-[10px] transition-colors"
+              >
+                Change / PDF
+              </button>
+            </div>
+          )}
           {mode === 'time' && (
             <>
               {([15, 30, 60, 120] as TimeOption[]).map(t => (
@@ -546,7 +714,7 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
       <div
         ref={arenaContainerRef}
         onClick={focusInput}
-        className={`relative p-6 sm:p-8 rounded-3xl ${theme.cardBg} border border-slate-800/80 cursor-text shadow-2xl transition-all min-h-[220px] flex flex-col justify-center`}
+        className={`relative p-6 sm:p-8 rounded-3xl ${theme.cardBg} border border-slate-800/80 cursor-text shadow-2xl transition-all min-h-[220px] max-h-[280px] overflow-y-auto scroll-smooth flex flex-col justify-start`}
       >
         {/* Invisible proxy textarea for desktop and mobile keyboard capture */}
         <textarea
@@ -564,7 +732,7 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
 
         {/* Text Display */}
         <div
-          className={`font-mono leading-relaxed select-none tracking-wide text-lg sm:text-2xl break-words ${
+          className={`font-mono leading-relaxed select-none tracking-wide text-lg sm:text-2xl whitespace-pre-wrap break-normal ${
             settings.fontSize === 'large'
               ? 'text-xl sm:text-3xl leading-loose'
               : settings.fontSize === 'small'
@@ -603,6 +771,15 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
           {customTextOverride ? 'Custom text active' : `${category} · ${mode}`}
         </div>
       </div>
+
+      {/* Custom Text & PDF Upload Modal */}
+      <CustomTextModal
+        isOpen={isCustomModalOpen}
+        onClose={() => setIsCustomModalOpen(false)}
+        savedTexts={savedCustomTexts}
+        onSaveToLibrary={onAddCustomText}
+        onLoadTextForPractice={handleLoadCustomText}
+      />
     </div>
   );
 };

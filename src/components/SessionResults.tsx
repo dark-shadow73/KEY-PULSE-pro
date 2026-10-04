@@ -14,26 +14,33 @@ import {
   Target,
   Clock,
   Sparkles,
-  Award
+  Award,
+  Medal,
+  Crown
 } from 'lucide-react';
-import { TypingSession, LeaderboardEntry } from '../types';
+import { TypingSession, LeaderboardEntry, Badge } from '../types';
+import { BADGE_TIER_CONFIG } from '../data/achievements';
 import { storageService } from '../services/storageService';
 import { useAuth } from '../context/AuthContext';
 
 interface SessionResultsProps {
   session: TypingSession;
+  newlyUnlockedBadges?: Badge[];
   onRestart: () => void;
   onNextTest: () => void;
   onViewStats: () => void;
   onViewLeaderboard: () => void;
+  onViewProfile?: () => void;
 }
 
 export const SessionResults: React.FC<SessionResultsProps> = ({
   session,
+  newlyUnlockedBadges = [],
   onRestart,
   onNextTest,
   onViewStats,
-  onViewLeaderboard
+  onViewLeaderboard,
+  onViewProfile
 }) => {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
@@ -249,6 +256,40 @@ export const SessionResults: React.FC<SessionResultsProps> = ({
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-200">
       <canvas ref={canvasRef} className="hidden" />
+
+      {/* Newly Unlocked Badges Celebration Banner */}
+      {newlyUnlockedBadges.length > 0 && (
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-950/60 via-yellow-950/40 to-slate-900 border-2 border-amber-400/80 shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 text-center sm:text-left">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-lg animate-bounce">
+                <Crown className="w-6 h-6 fill-current" />
+              </div>
+              <div>
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Milestone Unlocked!
+                </div>
+                <h3 className="text-base font-black text-slate-100">
+                  {newlyUnlockedBadges.map(b => b.name).join(', ')}
+                </h3>
+                <p className="text-xs text-slate-300 font-mono mt-0.5">
+                  {newlyUnlockedBadges.map(b => `+${b.points} PTS`).join(' · ')} · {newlyUnlockedBadges[0].description}
+                </p>
+              </div>
+            </div>
+
+            {onViewProfile && (
+              <button
+                onClick={onViewProfile}
+                className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs font-mono transition-all shadow whitespace-nowrap active:scale-95"
+              >
+                View Badges & Profile
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Top Banner / Hero Speed rating */}
       <div className="text-center space-y-2">

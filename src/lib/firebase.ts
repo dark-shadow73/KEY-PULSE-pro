@@ -1,9 +1,17 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+import rawConfig from '../../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
+const firebaseConfig = rawConfig || {
+  projectId: "helical-automata-103js",
+  appId: "1:564538746594:web:61d1b885cb07ea324560bb",
+  apiKey: "AIzaSyCEr8pUcweZzTd0UpBLpOlb059rCJf1GEE",
+  authDomain: "helical-automata-103js.firebaseapp.com",
+  firestoreDatabaseId: "ai-studio-keypulseprotypin-fb16538d-79bc-408e-810c-b70c14fec2bc"
+};
+
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 // Initialize Firestore with specific database ID
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
@@ -73,4 +81,4 @@ export async function testFirebaseConnection(): Promise<boolean> {
 }
 
 // Immediately trigger background check
-testFirebaseConnection();
+testFirebaseConnection().catch(() => {});

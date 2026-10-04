@@ -15,15 +15,16 @@ import {
   X,
   Settings as SettingsIcon,
   Sun,
-  Moon
+  Moon,
+  Medal
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ThemeName } from '../types';
 import { THEMES } from '../data/themes';
 
 interface NavbarProps {
-  activeTab: 'test' | 'stats' | 'leaderboard' | 'library' | 'settings';
-  setActiveTab: (tab: 'test' | 'stats' | 'leaderboard' | 'library' | 'settings') => void;
+  activeTab: 'test' | 'stats' | 'leaderboard' | 'library' | 'profile' | 'settings';
+  setActiveTab: (tab: 'test' | 'stats' | 'leaderboard' | 'library' | 'profile' | 'settings') => void;
   currentTheme: ThemeName;
   setTheme: (theme: ThemeName) => void;
   soundEnabled: boolean;
@@ -124,6 +125,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <BookOpen className="w-4 h-4" />
               Libraries
+            </button>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'profile'
+                  ? 'bg-slate-800 text-amber-400 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <Medal className="w-4 h-4" />
+              Badges
             </button>
           </nav>
         </div>
@@ -290,6 +302,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <BookOpen className="w-4 h-4" />
             Custom Text Libraries
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('profile');
+              setMobileMenuOpen(false);
+            }}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${
+              activeTab === 'profile' ? 'bg-slate-800 text-amber-400 font-medium' : 'text-slate-300'
+            }`}
+          >
+            <Medal className="w-4 h-4" />
+            Badges & Profile
           </button>
         </div>
       )}

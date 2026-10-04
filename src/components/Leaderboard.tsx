@@ -8,9 +8,11 @@ import {
   Target,
   RefreshCw,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Award
 } from 'lucide-react';
 import { LeaderboardEntry } from '../types';
+import { ALL_BADGES, BADGE_TIER_CONFIG } from '../data/achievements';
 import { storageService } from '../services/storageService';
 import { useAuth } from '../context/AuthContext';
 
@@ -237,12 +239,21 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onChallengeScore }) =>
                               {entry.displayName.charAt(0)}
                             </div>
                           )}
-                          <span className={isCurrentUser ? 'text-amber-300' : 'text-slate-200'}>
+                          <span className={isCurrentUser ? 'text-amber-300 font-bold' : 'text-slate-200'}>
                             {entry.displayName}
                           </span>
                           {isCurrentUser && (
                             <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-bold">
                               YOU
+                            </span>
+                          )}
+                          {entry.pinnedBadgeId && (
+                            <span
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/30 flex items-center gap-1 font-mono"
+                              title={`Pinned Badge: ${ALL_BADGES.find(b => b.id === entry.pinnedBadgeId)?.name || 'Milestone'}`}
+                            >
+                              <Award className="w-3 h-3" />
+                              {ALL_BADGES.find(b => b.id === entry.pinnedBadgeId)?.name.split('(')[0] || 'Badge'}
                             </span>
                           )}
                         </div>

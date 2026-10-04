@@ -6,10 +6,12 @@ import { SessionResults } from './components/SessionResults';
 import { ProgressDashboard } from './components/ProgressDashboard';
 import { Leaderboard } from './components/Leaderboard';
 import { CustomLibraryManager } from './components/CustomLibraryManager';
+import { UserProfileView } from './components/UserProfileView';
 import { CloudBackupModal } from './components/CloudBackupModal';
 import { SettingsModal } from './components/SettingsModal';
-import { TypingSession, CustomText, AppSettings, ThemeName } from './types';
+import { TypingSession, CustomText, AppSettings, ThemeName, Badge } from './types';
 import { storageService } from './services/storageService';
+import { evaluateBadges } from './data/achievements';
 import { THEMES } from './data/themes';
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -28,7 +30,7 @@ const LOCAL_STORAGE_SETTINGS = 'keypulse_settings_v1';
 
 function MainApp() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'test' | 'stats' | 'leaderboard' | 'library' | 'settings'>('test');
+  const [activeTab, setActiveTab] = useState<'test' | 'stats' | 'leaderboard' | 'library' | 'profile' | 'settings'>('test');
   const [settings, setSettings] = useState<AppSettings>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_SETTINGS);
@@ -41,6 +43,7 @@ function MainApp() {
   const [sessions, setSessions] = useState<TypingSession[]>([]);
   const [customTexts, setCustomTexts] = useState<CustomText[]>([]);
   const [completedSession, setCompletedSession] = useState<TypingSession | null>(null);
+  const [newlyUnlockedBadges, setNewlyUnlockedBadges] = useState<Badge[]>([]);
   const [customPracticeText, setCustomPracticeText] = useState<string | null>(null);
   const [customPracticeTitle, setCustomPracticeTitle] = useState<string | null>(null);
 
@@ -66,9 +69,17 @@ function MainApp() {
   };
 
   const handleTestComplete = (session: TypingSession) => {
+    // Check for newly unlocked badges
+    const currentProfile = storageService.getLocalProfile();
+    const previousBadgeIds = currentProfile?.unlockedBadgeIds || [];
+    const updatedSessions = [session, ...sessions];
+    const badgeEval = evaluateBadges(updatedSessions, previousBadgeIds);
+
+    setNewlyUnlockedBadges(badgeEval.newlyUnlockedBadges);
+
     // Save to local storage
     storageService.saveLocalSession(session);
-    setSessions(prev => [session, ...prev]);
+    setSessions(updatedSessions);
 
     // Background sync to cloud if authenticated
     if (user) {
@@ -82,10 +93,12 @@ function MainApp() {
 
   const handleRestartTest = () => {
     setCompletedSession(null);
+    setNewlyUnlockedBadges([]);
   };
 
   const handleNextTest = () => {
     setCompletedSession(null);
+    setNewlyUnlockedBadges([]);
     setCustomPracticeText(null);
     setCustomPracticeTitle(null);
   };
@@ -123,6 +136,10 @@ function MainApp() {
     setCustomPracticeText(null);
   };
 
+  const handlePinBadge = async (badgeId: string) => {
+    await storageService.setPinnedBadge(badgeId);
+  };
+
   const themeConfig = THEMES[settings.theme] || THEMES.midnight;
 
   return (
@@ -153,6 +170,7 @@ function MainApp() {
             {completedSession ? (
               <SessionResults
                 session={completedSession}
+                newlyUnlockedBadges={newlyUnlockedBadges}
                 onRestart={handleRestartTest}
                 onNextTest={handleNextTest}
                 onViewStats={() => {
@@ -162,6 +180,10 @@ function MainApp() {
                 onViewLeaderboard={() => {
                   setCompletedSession(null);
                   setActiveTab('leaderboard');
+                }}
+                onViewProfile={() => {
+                  setCompletedSession(null);
+                  setActiveTab('profile');
                 }}
               />
             ) : (
@@ -212,6 +234,17 @@ function MainApp() {
             onAddCustomText={handleAddCustomText}
             onDeleteCustomText={handleDeleteCustomText}
             onSelectForPractice={handleSelectPracticeText}
+          />
+        )}
+
+        {activeTab === 'profile' && (
+          <UserProfileView
+            sessions={sessions}
+            onPinBadge={handlePinBadge}
+            onStartTest={() => {
+              setCompletedSession(null);
+              setActiveTab('test');
+            }}
           />
         )}
       </main>

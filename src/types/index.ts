@@ -29,17 +29,19 @@ export interface TypingSession {
   missedCharacters?: Record<string, number>;
 }
 
-export interface LeaderboardEntry {
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'diamond' | 'mythic';
+export type BadgeCategory = 'speed' | 'volume' | 'accuracy' | 'special';
+
+export interface Badge {
   id: string;
-  userId: string;
-  displayName: string;
-  photoURL?: string;
-  wpm: number;
-  cpm: number;
-  accuracy: number;
-  mode: string;
-  category?: string;
-  timestamp: string;
+  name: string;
+  description: string;
+  tier: BadgeTier;
+  category: BadgeCategory;
+  icon: string;
+  targetMetric: 'wpm' | 'totalWords' | 'accuracy' | 'testsCompleted' | 'special';
+  targetValue: number;
+  points: number;
 }
 
 export interface UserProfile {
@@ -50,7 +52,26 @@ export interface UserProfile {
   bestCpm: number;
   testsCompleted: number;
   averageAccuracy: number;
+  totalWordsTyped?: number;
+  achievementPoints?: number;
+  unlockedBadgeIds?: string[];
+  pinnedBadgeId?: string;
   updatedAt: string;
+}
+
+export interface LeaderboardEntry {
+  id: string;
+  userId: string;
+  displayName: string;
+  photoURL?: string;
+  wpm: number;
+  cpm: number;
+  accuracy: number;
+  mode: string;
+  category?: string;
+  pinnedBadgeId?: string;
+  achievementPoints?: number;
+  timestamp: string;
 }
 
 export interface CustomText {

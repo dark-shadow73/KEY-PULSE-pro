@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { TypingSession, LeaderboardEntry, UserProfile, CustomText } from '../types';
+import { evaluateBadges, calculateTotalWordsTyped } from '../data/achievements';
 
 const LOCAL_STORAGE_SESSIONS = 'keypulse_sessions_v1';
 const LOCAL_STORAGE_CUSTOM_TEXTS = 'keypulse_custom_texts_v1';
@@ -218,11 +219,15 @@ export const storageService = {
     const userPath = `users/${user.uid}`;
     try {
       const sessions = this.getLocalSessions();
+      const currentProfile = this.getLocalProfile();
       const bestWpm = Math.max(session.wpm, ...sessions.map(s => s.wpm), 0);
       const bestCpm = Math.max(session.cpm, ...sessions.map(s => s.cpm), 0);
       const avgAccuracy = sessions.length > 0
         ? Math.round(sessions.reduce((acc, cur) => acc + cur.accuracy, 0) / sessions.length * 10) / 10
         : session.accuracy;
+
+      const totalWords = calculateTotalWordsTyped(sessions);
+      const badgeEval = evaluateBadges(sessions, currentProfile?.unlockedBadgeIds || []);
 
       const profile: UserProfile = {
         uid: user.uid,
@@ -232,6 +237,10 @@ export const storageService = {
         bestCpm,
         testsCompleted: sessions.length,
         averageAccuracy: avgAccuracy,
+        totalWordsTyped: totalWords,
+        achievementPoints: badgeEval.totalPoints,
+        unlockedBadgeIds: badgeEval.unlockedBadgeIds,
+        pinnedBadgeId: currentProfile?.pinnedBadgeId || (badgeEval.unlockedBadgeIds[0] || undefined),
         updatedAt: new Date().toISOString()
       };
 
@@ -248,6 +257,7 @@ export const storageService = {
 
     const entryId = `${user.uid}_${session.mode}`.replace(/[^a-zA-Z0-9_\-]/g, '_');
     const path = `leaderboard/${entryId}`;
+    const profile = this.getLocalProfile();
 
     try {
       const entry: LeaderboardEntry = {
@@ -260,12 +270,35 @@ export const storageService = {
         accuracy: session.accuracy,
         mode: session.mode,
         category: session.category,
+        pinnedBadgeId: profile?.pinnedBadgeId,
+        achievementPoints: profile?.achievementPoints,
         timestamp: session.timestamp
       };
 
       await setDoc(doc(db, 'leaderboard', entryId), entry, { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
+    }
+  },
+
+  async setPinnedBadge(badgeId: string): Promise<void> {
+    const profile = this.getLocalProfile();
+    if (!profile) return;
+    const updated: UserProfile = {
+      ...profile,
+      pinnedBadgeId: badgeId,
+      updatedAt: new Date().toISOString()
+    };
+    this.saveLocalProfile(updated);
+
+    const user = auth.currentUser;
+    if (user) {
+      const userPath = `users/${user.uid}`;
+      try {
+        await setDoc(doc(db, 'users', user.uid), { pinnedBadgeId: badgeId, updatedAt: new Date().toISOString() }, { merge: true });
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, userPath);
+      }
     }
   },
 

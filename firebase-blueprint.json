@@ -12,6 +12,10 @@
         "bestCpm": { "type": "number" },
         "testsCompleted": { "type": "number" },
         "averageAccuracy": { "type": "number" },
+        "totalWordsTyped": { "type": "number" },
+        "achievementPoints": { "type": "number" },
+        "unlockedBadgeIds": { "type": "array" },
+        "pinnedBadgeId": { "type": "string", "maxLength": 100 },
         "updatedAt": { "type": "string" }
       },
       "required": ["uid", "displayName", "bestWpm", "testsCompleted"]
@@ -50,6 +54,8 @@
         "accuracy": { "type": "number" },
         "mode": { "type": "string", "maxLength": 50 },
         "category": { "type": "string", "maxLength": 50 },
+        "pinnedBadgeId": { "type": "string", "maxLength": 100 },
+        "achievementPoints": { "type": "number" },
         "timestamp": { "type": "string" }
       },
       "required": ["id", "userId", "displayName", "wpm", "cpm", "accuracy", "mode"]

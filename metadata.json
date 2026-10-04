@@ -1,0 +1,6 @@
+{
+  "name": "KeyPulse - Pro Typing Speed & Analytics",
+  "description": "High-performance typing speed test with real-time WPM/CPM accuracy tracking, detailed session analytics, custom text libraries, dark mode, social sharing, and cloud sync.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

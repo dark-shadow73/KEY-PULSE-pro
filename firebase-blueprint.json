@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with all-time typing statistics",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "bestWpm": { "type": "number" },
+        "bestCpm": { "type": "number" },
+        "testsCompleted": { "type": "number" },
+        "averageAccuracy": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "displayName", "bestWpm", "testsCompleted"]
+    },
+    "TypingSession": {
+      "title": "TypingSession",
+      "description": "A single completed typing test session with telemetry metrics",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "wpm": { "type": "number" },
+        "cpm": { "type": "number" },
+        "rawWpm": { "type": "number" },
+        "accuracy": { "type": "number" },
+        "duration": { "type": "number" },
+        "characterCount": { "type": "number" },
+        "errorCount": { "type": "number" },
+        "mode": { "type": "string", "maxLength": 50 },
+        "category": { "type": "string", "maxLength": 50 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "wpm", "cpm", "accuracy", "duration"]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Public competitive score entry for global typing rankings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "wpm": { "type": "number" },
+        "cpm": { "type": "number" },
+        "accuracy": { "type": "number" },
+        "mode": { "type": "string", "maxLength": 50 },
+        "category": { "type": "string", "maxLength": 50 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "displayName", "wpm", "cpm", "accuracy", "mode"]
+    },
+    "CustomText": {
+      "title": "CustomText",
+      "description": "Custom practice texts saved by the user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 120 },
+        "content": { "type": "string", "maxLength": 5000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Holds individual user profile and cumulative stats"
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/TypingSession" },
+      "description": "User specific typing history for progress tracking"
+    },
+    "/users/{userId}/custom_texts/{textId}": {
+      "schema": { "$ref": "#/entities/CustomText" },
+      "description": "User custom text libraries for varied practice"
+    },
+    "/leaderboard/{entryId}": {
+      "schema": { "$ref": "#/entities/LeaderboardEntry" },
+      "description": "Global competitive leaderboard for all users"
+    }
+  }
+}

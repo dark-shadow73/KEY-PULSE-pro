@@ -9,6 +9,7 @@ import { CustomLibraryManager } from './components/CustomLibraryManager';
 import { UserProfileView } from './components/UserProfileView';
 import { CloudBackupModal } from './components/CloudBackupModal';
 import { SettingsModal } from './components/SettingsModal';
+import { AdsterraSidebars } from './components/AdsterraSidebars';
 import { TypingSession, CustomText, AppSettings, ThemeName, Badge } from './types';
 import { storageService } from './services/storageService';
 import { evaluateBadges } from './data/achievements';
@@ -164,7 +165,10 @@ function MainApp() {
         }}
       />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center justify-center">
+      {/* Rotating Adsterra Direct Link Sidebars (Desktop XL/2XL and Mobile) */}
+      <AdsterraSidebars />
+
+      <main className="flex-1 max-w-5xl 2xl:max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center justify-center relative z-10">
         {activeTab === 'test' && (
           <div className="w-full">
             {completedSession ? (

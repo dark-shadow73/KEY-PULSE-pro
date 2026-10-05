@@ -66,6 +66,22 @@ export const SessionResults: React.FC<SessionResultsProps> = ({
     }
   }, [session.wpm, session.accuracy]);
 
+  // Keyboard shortcut listener (Esc / Tab for restart, Enter for next test)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === 'INPUT') return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onRestart();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        onNextTest();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onRestart, onNextTest]);
+
   // Determine speed tier
   const getSpeedRating = (wpm: number) => {
     if (wpm >= 120) return { label: 'Grandmaster Typist', color: 'text-amber-400', desc: 'Top 1% elite typing velocity!' };
@@ -291,18 +307,61 @@ export const SessionResults: React.FC<SessionResultsProps> = ({
         </div>
       )}
 
-      {/* Top Banner / Hero Speed rating */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider font-mono">
-          <Sparkles className="w-3.5 h-3.5" />
-          Test Session Completed
+      {/* Top Banner & Quick Actions (Green bordered area in screenshot) */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+        {/* Left Side: Retake / Restart / New Task Buttons (Exact Green Box location) */}
+        <div className="md:col-span-4 p-4 rounded-3xl bg-slate-900/95 border-2 border-emerald-500/40 hover:border-emerald-400/70 shadow-2xl space-y-2.5 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <RotateCcw className="w-3.5 h-3.5" />
+              Quick Action / রিটেক
+            </span>
+            <span className="text-[10px] font-mono text-slate-500">[Esc] Retry</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={onRestart}
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold font-mono text-xs transition-all shadow-md active:scale-95 group"
+              title="Retake the same test passage"
+            >
+              <RotateCcw className="w-3.5 h-3.5 group-hover:-rotate-45 transition-transform" />
+              <span>Retake</span>
+            </button>
+
+            <button
+              onClick={onNextTest}
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold font-mono text-xs transition-all border border-slate-700 active:scale-95 group"
+              title="Start a new random text/words task"
+            >
+              <span>New Task</span>
+              <ArrowRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+
+          <button
+            onClick={onRestart}
+            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-amber-400 font-mono text-xs font-semibold transition-colors border border-slate-800"
+            title="Restart current typing session"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Restart Session (রিস্টার্ট)</span>
+          </button>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
-          Performance Breakdown
-        </h2>
-        <p className={`text-sm font-medium ${rating.color}`}>
-          {rating.label} · {rating.desc}
-        </p>
+
+        {/* Center / Right: Performance Breakdown header */}
+        <div className="md:col-span-8 text-center md:text-left space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider font-mono">
+            <Sparkles className="w-3.5 h-3.5" />
+            Test Session Completed
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
+            Performance Breakdown
+          </h2>
+          <p className={`text-sm font-medium ${rating.color}`}>
+            {rating.label} · {rating.desc}
+          </p>
+        </div>
       </div>
 
       {/* Hero Stats Grid */}

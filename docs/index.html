@@ -13,20 +13,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script>
-      // Immediate redirect for static GitHub Pages serving from repository root
-      if (window.location.hostname.includes('github.io') || window.location.protocol === 'file:') {
-        var path = window.location.pathname;
-        if (!path.includes('/dist/') && !path.includes('/docs/')) {
-          var target = path.replace(/\/+$/, '') + '/dist/' + window.location.search + window.location.hash;
-          window.location.replace(target);
+      // If user landed on /dist/ directly, smoothly normalize URL back to root
+      if (window.location.pathname.includes('/dist/')) {
+        var normalized = window.location.pathname.replace(/\/dist\/?/, '/') + window.location.search + window.location.hash;
+        if (window.location.pathname !== normalized) {
+          window.location.replace(normalized);
         }
       }
     </script>
-    <script type="module" crossorigin src="./assets/index-BELAkT_J.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-239FZkmV.css">
+    <script type="module" crossorigin src="./assets/index-BZkOp_eu.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D7C9aqCy.css">
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased selection:bg-amber-400/30 selection:text-amber-200 min-h-screen">
     <div id="root"></div>
   </body>
 </html>
-

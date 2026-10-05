@@ -13,12 +13,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script>
-      // Immediate redirect for static GitHub Pages serving from repository root
-      if (window.location.hostname.includes('github.io') || window.location.protocol === 'file:') {
-        var path = window.location.pathname;
-        if (!path.includes('/dist/') && !path.includes('/docs/')) {
-          var target = path.replace(/\/+$/, '') + '/dist/' + window.location.search + window.location.hash;
-          window.location.replace(target);
+      // If user landed on /dist/ directly, smoothly normalize URL back to root
+      if (window.location.pathname.includes('/dist/')) {
+        var normalized = window.location.pathname.replace(/\/dist\/?/, '/') + window.location.search + window.location.hash;
+        if (window.location.pathname !== normalized) {
+          window.location.replace(normalized);
         }
       }
     </script>
@@ -28,4 +27,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ExternalLink, Sparkles, Zap, Gift, Flame, TrendingUp } from 'lucide-react';
+import { ExternalLink, Sparkles, Flame, Gift, TrendingUp, CheckCircle, Zap, ShieldCheck } from 'lucide-react';
 
 export const ADSTERRA_DIRECT_LINKS = [
   'https://www.profitableratecpmnetwork.com/cy6ezs34?key=f0221c22f211ad051de69df8d22e774e',
@@ -9,227 +9,290 @@ export const ADSTERRA_DIRECT_LINKS = [
 
 interface AdCreative {
   title: string;
-  subtitle: string;
   badge: string;
-  tag: string;
-  accentColor: string;
-  borderColor: string;
+  tagline: string;
+  description: string;
+  ctaText: string;
+  highlights: string[];
+  gradientBg: string;
+  borderStyle: string;
   glowColor: string;
+  buttonColor: string;
+  iconColor: string;
 }
 
 const CREATIVES: AdCreative[] = [
   {
-    title: 'Special Rewards & Bonus',
-    subtitle: 'Exclusive partner offers unlocked for top speed typists',
-    badge: 'Trending Now',
-    tag: 'Claim Reward',
-    accentColor: 'from-amber-500/20 via-yellow-500/10 to-transparent',
-    borderColor: 'border-amber-500/40 hover:border-amber-400',
-    glowColor: 'bg-amber-400/10'
+    title: 'Special Rewards & Bonus Deals',
+    badge: 'Trending Offer',
+    tagline: 'Exclusive partner rewards unlocked for active typists',
+    description: 'Explore top-rated online offers, bonuses, and special rewards verified by our global network.',
+    ctaText: 'Claim Your Reward',
+    highlights: ['Instant Access Link', 'Verified Safe & Direct', 'No Registration Needed', 'Updated Daily Deals'],
+    gradientBg: 'from-amber-950/40 via-yellow-950/20 to-slate-900/90',
+    borderStyle: 'border-amber-500/40 hover:border-amber-400',
+    glowColor: 'bg-amber-500/15',
+    buttonColor: 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-amber-400/20',
+    iconColor: 'text-amber-400 bg-amber-400/10 border-amber-400/30'
   },
   {
-    title: 'Top Rated Offers',
-    subtitle: 'High speed tools, deals & exclusive digital gifts',
-    badge: 'Popular',
-    tag: 'Explore Offer',
-    accentColor: 'from-emerald-500/20 via-teal-500/10 to-transparent',
-    borderColor: 'border-emerald-500/40 hover:border-emerald-400',
-    glowColor: 'bg-emerald-400/10'
+    title: 'Top Rated Digital Offers',
+    badge: 'Popular Choice',
+    tagline: 'High-speed tools, trending games & exclusive gifts',
+    description: 'Discover trending entertainment, software perks, and popular high-paying web deals today.',
+    ctaText: 'Explore Offers Now',
+    highlights: ['Exclusive Partner Access', 'Top Ranked Worldwide', 'Zero Cooldown Period', 'Instant Fast Loading'],
+    gradientBg: 'from-emerald-950/40 via-teal-950/20 to-slate-900/90',
+    borderStyle: 'border-emerald-500/40 hover:border-emerald-400',
+    glowColor: 'bg-emerald-500/15',
+    buttonColor: 'bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-emerald-400/20',
+    iconColor: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30'
   },
   {
-    title: 'Exclusive Access',
-    subtitle: 'Discover trending apps, games & premium deals today',
-    badge: 'Featured',
-    tag: 'Visit Now',
-    accentColor: 'from-purple-500/20 via-indigo-500/10 to-transparent',
-    borderColor: 'border-purple-500/40 hover:border-purple-400',
-    glowColor: 'bg-purple-400/10'
+    title: 'Exclusive Partner Access',
+    badge: 'Featured Network',
+    tagline: 'Unlock premium digital content and sponsored prizes',
+    description: 'Browse the latest curated promotions and special featured destination links from Adsterra.',
+    ctaText: 'Visit & Discover',
+    highlights: ['Special Curated Offers', 'High Conversion Rates', 'Multi-Platform Ready', '100% Free Access'],
+    gradientBg: 'from-cyan-950/40 via-blue-950/20 to-slate-900/90',
+    borderStyle: 'border-cyan-500/40 hover:border-cyan-400',
+    glowColor: 'bg-cyan-500/15',
+    buttonColor: 'bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-cyan-400/20',
+    iconColor: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/30'
   }
 ];
 
-export const AdsterraSidebars: React.FC = () => {
-  const [leftIndex, setLeftIndex] = useState(() => Math.floor(Math.random() * ADSTERRA_DIRECT_LINKS.length));
-  const [rightIndex, setRightIndex] = useState(() => {
-    const remaining = [0, 1, 2].filter(i => i !== Math.floor(Math.random() * ADSTERRA_DIRECT_LINKS.length));
-    return remaining[Math.floor(Math.random() * remaining.length)] || 1;
-  });
+export const LeftAdsterraSidebar: React.FC = () => {
+  const [linkIdx, setLinkIdx] = useState(() => Math.floor(Math.random() * ADSTERRA_DIRECT_LINKS.length));
+  const [creativeIdx, setCreativeIdx] = useState(0);
 
-  const [leftCreativeIdx, setLeftCreativeIdx] = useState(0);
-  const [rightCreativeIdx, setRightCreativeIdx] = useState(1);
-
-  // Periodically rotate links and creative messages randomly every 15 seconds
-  const rotateLinks = useCallback(() => {
-    setLeftIndex(prev => {
-      const next = (prev + 1 + Math.floor(Math.random() * 2)) % ADSTERRA_DIRECT_LINKS.length;
-      return next;
-    });
-    setRightIndex(prev => {
-      const next = (prev + 1 + Math.floor(Math.random() * 2)) % ADSTERRA_DIRECT_LINKS.length;
-      return next;
-    });
-    setLeftCreativeIdx(prev => (prev + 1) % CREATIVES.length);
-    setRightCreativeIdx(prev => (prev + 2) % CREATIVES.length);
+  const rotate = useCallback(() => {
+    setLinkIdx(prev => (prev + 1 + Math.floor(Math.random() * 2)) % ADSTERRA_DIRECT_LINKS.length);
+    setCreativeIdx(prev => (prev + 1) % CREATIVES.length);
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(rotateLinks, 16000);
+    const timer = setInterval(rotate, 15000);
     return () => clearInterval(timer);
-  }, [rotateLinks]);
+  }, [rotate]);
 
-  const handleOpenAd = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-    // Rotate to next random link immediately upon click
-    rotateLinks();
+  const handleOpen = () => {
+    window.open(ADSTERRA_DIRECT_LINKS[linkIdx], '_blank', 'noopener,noreferrer');
+    rotate();
   };
 
-  const leftCreative = CREATIVES[leftCreativeIdx];
-  const rightCreative = CREATIVES[rightCreativeIdx];
+  const creative = CREATIVES[creativeIdx];
 
   return (
-    <>
-      {/* Left Sidebar Ad (Desktop XL screens - exactly matching the left red box) */}
-      <aside
-        aria-label="Sponsored Partner Content"
-        className="hidden xl:flex fixed left-3 2xl:left-6 top-24 bottom-6 w-36 2xl:w-44 z-20 flex-col justify-between"
+    <aside
+      aria-label="Sponsored Content Left"
+      className="hidden xl:flex flex-1 min-w-[220px] max-w-[360px] 2xl:max-w-[420px] sticky top-20 h-[calc(100vh-6rem)] shrink-0 self-start"
+    >
+      <div
+        onClick={handleOpen}
+        className={`group w-full h-full rounded-3xl bg-gradient-to-b ${creative.gradientBg} border-2 ${creative.borderStyle} p-4 sm:p-5 flex flex-col justify-between shadow-2xl backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl select-none relative overflow-hidden`}
       >
-        <div
-          onClick={() => handleOpenAd(ADSTERRA_DIRECT_LINKS[leftIndex])}
-          className={`group h-full w-full rounded-2xl bg-gradient-to-b ${leftCreative.accentColor} bg-slate-900/90 border ${leftCreative.borderColor} p-3.5 flex flex-col justify-between shadow-2xl backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-amber-500/10 select-none overflow-hidden relative`}
-        >
-          {/* Ambient Glow */}
-          <div className={`absolute -top-10 -left-10 w-28 h-28 ${leftCreative.glowColor} rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform`} />
+        {/* Ambient Top Glow */}
+        <div className={`absolute -top-12 -left-12 w-48 h-48 ${creative.glowColor} rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform`} />
 
-          {/* Top Header */}
-          <div className="space-y-3 relative z-10 text-center">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-semibold">
-                Sponsored
-              </span>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-400/20 text-amber-300">
-                AD
-              </span>
-            </div>
-
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700/60 text-[10px] text-amber-400 font-mono">
-              <Sparkles className="w-3 h-3" />
-              <span>{leftCreative.badge}</span>
-            </div>
-
-            <h4 className="text-xs 2xl:text-sm font-extrabold text-slate-100 group-hover:text-amber-400 transition-colors leading-snug">
-              {leftCreative.title}
-            </h4>
-
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              {leftCreative.subtitle}
-            </p>
-          </div>
-
-          {/* Center Graphic */}
-          <div className="my-auto py-4 flex flex-col items-center justify-center relative z-10">
-            <div className="w-14 h-14 2xl:w-16 2xl:h-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 group-hover:scale-110 group-hover:bg-amber-400 group-hover:text-slate-950 transition-all duration-300 shadow-lg shadow-amber-400/5">
-              <Flame className="w-7 h-7 2xl:w-8 2xl:h-8" />
-            </div>
-            <span className="text-[10px] font-mono text-slate-400 mt-2 font-medium">
-              Click to Open
+        {/* Top Header */}
+        <div className="space-y-3 relative z-10">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <span className="text-[11px] font-mono tracking-widest text-slate-400 uppercase font-bold flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              Sponsored Partner
             </span>
-          </div>
-
-          {/* Bottom Action Button */}
-          <div className="relative z-10 space-y-2">
-            <div className="w-full py-2.5 px-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold font-mono text-[11px] 2xl:text-xs flex items-center justify-center gap-1.5 shadow-md transition-all group-hover:shadow-amber-400/30 active:scale-95">
-              <span>{leftCreative.tag}</span>
-              <ExternalLink className="w-3 h-3 shrink-0" />
-            </div>
-
-            <div className="text-[9px] text-center text-slate-400 font-mono">
-              Adsterra Direct
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Right Sidebar Ad (Desktop XL screens - exactly matching the right red box) */}
-      <aside
-        aria-label="Sponsored Partner Content"
-        className="hidden xl:flex fixed right-3 2xl:right-6 top-24 bottom-6 w-36 2xl:w-44 z-20 flex-col justify-between"
-      >
-        <div
-          onClick={() => handleOpenAd(ADSTERRA_DIRECT_LINKS[rightIndex])}
-          className={`group h-full w-full rounded-2xl bg-gradient-to-b ${rightCreative.accentColor} bg-slate-900/90 border ${rightCreative.borderColor} p-3.5 flex flex-col justify-between shadow-2xl backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-500/10 select-none overflow-hidden relative`}
-        >
-          {/* Ambient Glow */}
-          <div className={`absolute -top-10 -right-10 w-28 h-28 ${rightCreative.glowColor} rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform`} />
-
-          {/* Top Header */}
-          <div className="space-y-3 relative z-10 text-center">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-semibold">
-                Sponsored
-              </span>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-400/20 text-cyan-300">
-                AD
-              </span>
-            </div>
-
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700/60 text-[10px] text-cyan-400 font-mono">
-              <TrendingUp className="w-3 h-3" />
-              <span>{rightCreative.badge}</span>
-            </div>
-
-            <h4 className="text-xs 2xl:text-sm font-extrabold text-slate-100 group-hover:text-cyan-400 transition-colors leading-snug">
-              {rightCreative.title}
-            </h4>
-
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              {rightCreative.subtitle}
-            </p>
-          </div>
-
-          {/* Center Graphic */}
-          <div className="my-auto py-4 flex flex-col items-center justify-center relative z-10">
-            <div className="w-14 h-14 2xl:w-16 2xl:h-16 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-400 group-hover:text-slate-950 transition-all duration-300 shadow-lg shadow-cyan-400/5">
-              <Gift className="w-7 h-7 2xl:w-8 2xl:h-8" />
-            </div>
-            <span className="text-[10px] font-mono text-slate-400 mt-2 font-medium">
-              Click to Open
-            </span>
-          </div>
-
-          {/* Bottom Action Button */}
-          <div className="relative z-10 space-y-2">
-            <div className="w-full py-2.5 px-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold font-mono text-[11px] 2xl:text-xs flex items-center justify-center gap-1.5 shadow-md transition-all group-hover:shadow-cyan-400/30 active:scale-95">
-              <span>{rightCreative.tag}</span>
-              <ExternalLink className="w-3 h-3 shrink-0" />
-            </div>
-
-            <div className="text-[9px] text-center text-slate-400 font-mono">
-              Adsterra Direct
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile/Tablet Sponsored Banner */}
-      <div className="xl:hidden w-full max-w-4xl mx-auto px-4 mt-6">
-        <div
-          onClick={() => handleOpenAd(ADSTERRA_DIRECT_LINKS[leftIndex])}
-          className="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-500/30 hover:border-amber-400 flex items-center justify-between gap-3 shadow-lg cursor-pointer transition-all hover:bg-slate-800/80"
-        >
-          <div className="flex items-center gap-2.5">
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-400/20 text-amber-300">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-amber-400/20 text-amber-300 border border-amber-400/30">
               AD
             </span>
-            <div className="text-left">
-              <p className="text-xs font-bold text-slate-100 line-clamp-1">{leftCreative.title}</p>
-              <p className="text-[11px] text-slate-400 line-clamp-1">{leftCreative.subtitle}</p>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-mono text-amber-400 font-semibold shadow">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>{creative.badge}</span>
+          </div>
+
+          <h3 className="text-base 2xl:text-lg font-black text-slate-100 group-hover:text-amber-400 transition-colors leading-tight">
+            {creative.title}
+          </h3>
+
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {creative.tagline}
+          </p>
+        </div>
+
+        {/* Center Visual Feature & Highlights */}
+        <div className="my-auto py-3 space-y-4 relative z-10">
+          <div className="flex justify-center">
+            <div className={`w-16 h-16 2xl:w-20 2xl:h-20 rounded-2xl ${creative.iconColor} border flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl`}>
+              <Flame className="w-9 h-9 2xl:w-11 2xl:h-11" />
             </div>
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold font-mono text-xs flex items-center gap-1 shrink-0">
-            <span>{leftCreative.tag}</span>
-            <ExternalLink className="w-3 h-3" />
+
+          <div className="space-y-2 p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+            {creative.highlights.map((h, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs font-medium text-slate-300">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="truncate">{h}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[11px] text-slate-400 text-center line-clamp-2 px-1">
+            {creative.description}
+          </p>
+        </div>
+
+        {/* Bottom CTA Button */}
+        <div className="relative z-10 space-y-2">
+          <button
+            onClick={handleOpen}
+            className={`w-full py-3.5 px-4 rounded-2xl ${creative.buttonColor} font-black font-mono text-xs 2xl:text-sm flex items-center justify-center gap-2 shadow-lg transition-all group-hover:scale-105 active:scale-95`}
+          >
+            <span>{creative.ctaText}</span>
+            <ExternalLink className="w-4 h-4 shrink-0" />
+          </button>
+
+          <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono px-1">
+            <span>Adsterra Direct Link</span>
+            <span className="text-emerald-400 flex items-center gap-1">● Active</span>
           </div>
         </div>
       </div>
-    </>
+    </aside>
+  );
+};
+
+export const RightAdsterraSidebar: React.FC = () => {
+  const [linkIdx, setLinkIdx] = useState(() => (Math.floor(Math.random() * 2) + 1) % ADSTERRA_DIRECT_LINKS.length);
+  const [creativeIdx, setCreativeIdx] = useState(1);
+
+  const rotate = useCallback(() => {
+    setLinkIdx(prev => (prev + 1 + Math.floor(Math.random() * 2)) % ADSTERRA_DIRECT_LINKS.length);
+    setCreativeIdx(prev => (prev + 1) % CREATIVES.length);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(rotate, 15000);
+    return () => clearInterval(timer);
+  }, [rotate]);
+
+  const handleOpen = () => {
+    window.open(ADSTERRA_DIRECT_LINKS[linkIdx], '_blank', 'noopener,noreferrer');
+    rotate();
+  };
+
+  const creative = CREATIVES[creativeIdx];
+
+  return (
+    <aside
+      aria-label="Sponsored Content Right"
+      className="hidden xl:flex flex-1 min-w-[220px] max-w-[360px] 2xl:max-w-[420px] sticky top-20 h-[calc(100vh-6rem)] shrink-0 self-start"
+    >
+      <div
+        onClick={handleOpen}
+        className={`group w-full h-full rounded-3xl bg-gradient-to-b ${creative.gradientBg} border-2 ${creative.borderStyle} p-4 sm:p-5 flex flex-col justify-between shadow-2xl backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl select-none relative overflow-hidden`}
+      >
+        {/* Ambient Top Glow */}
+        <div className={`absolute -top-12 -right-12 w-48 h-48 ${creative.glowColor} rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform`} />
+
+        {/* Top Header */}
+        <div className="space-y-3 relative z-10">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <span className="text-[11px] font-mono tracking-widest text-slate-400 uppercase font-bold flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+              Sponsored Partner
+            </span>
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
+              AD
+            </span>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-mono text-cyan-400 font-semibold shadow">
+            <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{creative.badge}</span>
+          </div>
+
+          <h3 className="text-base 2xl:text-lg font-black text-slate-100 group-hover:text-cyan-400 transition-colors leading-tight">
+            {creative.title}
+          </h3>
+
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {creative.tagline}
+          </p>
+        </div>
+
+        {/* Center Visual Feature & Highlights */}
+        <div className="my-auto py-3 space-y-4 relative z-10">
+          <div className="flex justify-center">
+            <div className={`w-16 h-16 2xl:w-20 2xl:h-20 rounded-2xl ${creative.iconColor} border flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl`}>
+              <Gift className="w-9 h-9 2xl:w-11 2xl:h-11" />
+            </div>
+          </div>
+
+          <div className="space-y-2 p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+            {creative.highlights.map((h, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs font-medium text-slate-300">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="truncate">{h}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[11px] text-slate-400 text-center line-clamp-2 px-1">
+            {creative.description}
+          </p>
+        </div>
+
+        {/* Bottom CTA Button */}
+        <div className="relative z-10 space-y-2">
+          <button
+            onClick={handleOpen}
+            className={`w-full py-3.5 px-4 rounded-2xl ${creative.buttonColor} font-black font-mono text-xs 2xl:text-sm flex items-center justify-center gap-2 shadow-lg transition-all group-hover:scale-105 active:scale-95`}
+          >
+            <span>{creative.ctaText}</span>
+            <ExternalLink className="w-4 h-4 shrink-0" />
+          </button>
+
+          <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono px-1">
+            <span>Adsterra Direct Link</span>
+            <span className="text-cyan-400 flex items-center gap-1">● Active</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+export const MobileAdsterraBanner: React.FC = () => {
+  const [linkIdx, setLinkIdx] = useState(() => Math.floor(Math.random() * ADSTERRA_DIRECT_LINKS.length));
+
+  const handleOpen = () => {
+    window.open(ADSTERRA_DIRECT_LINKS[linkIdx], '_blank', 'noopener,noreferrer');
+    setLinkIdx(prev => (prev + 1) % ADSTERRA_DIRECT_LINKS.length);
+  };
+
+  return (
+    <div className="xl:hidden w-full max-w-4xl mx-auto px-4 my-6">
+      <div
+        onClick={handleOpen}
+        className="p-3.5 rounded-2xl bg-slate-900/95 border border-amber-500/40 hover:border-amber-400 flex items-center justify-between gap-3 shadow-xl cursor-pointer transition-all hover:bg-slate-800"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-amber-400/20 text-amber-300">
+            AD
+          </span>
+          <div className="text-left">
+            <p className="text-xs font-bold text-slate-100">Special Partner Offers & Rewards</p>
+            <p className="text-[11px] text-slate-400">Exclusive bonuses unlocked for speed typists</p>
+          </div>
+        </div>
+        <div className="px-3.5 py-2 rounded-xl bg-amber-400 text-slate-950 font-bold font-mono text-xs flex items-center gap-1.5 shrink-0 shadow">
+          <span>Claim</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </div>
+      </div>
+    </div>
   );
 };

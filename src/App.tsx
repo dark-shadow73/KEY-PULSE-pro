@@ -9,7 +9,7 @@ import { CustomLibraryManager } from './components/CustomLibraryManager';
 import { UserProfileView } from './components/UserProfileView';
 import { CloudBackupModal } from './components/CloudBackupModal';
 import { SettingsModal } from './components/SettingsModal';
-import { AdsterraSidebars } from './components/AdsterraSidebars';
+import { LeftAdsterraSidebar, RightAdsterraSidebar, MobileAdsterraBanner } from './components/AdsterraSidebars';
 import { TypingSession, CustomText, AppSettings, ThemeName, Badge } from './types';
 import { storageService } from './services/storageService';
 import { evaluateBadges } from './data/achievements';
@@ -165,10 +165,13 @@ function MainApp() {
         }}
       />
 
-      {/* Rotating Adsterra Direct Link Sidebars (Desktop XL/2XL and Mobile) */}
-      <AdsterraSidebars />
+      {/* 3-Column Layout with Full-Fill Left & Right Adsterra Sidebars on Desktop */}
+      <div className="flex-1 w-full max-w-[1920px] mx-auto flex items-start justify-center px-3 sm:px-4 xl:px-6 gap-4 2xl:gap-6 relative">
+        {/* Left Full-Fill Sidebar Ad (Fills the entire left red-bordered space) */}
+        <LeftAdsterraSidebar />
 
-      <main className="flex-1 max-w-5xl 2xl:max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center justify-center relative z-10">
+        {/* Central Application Workspace */}
+        <main className="w-full max-w-4xl 2xl:max-w-5xl shrink-0 mx-auto py-6 sm:py-8 flex flex-col items-center justify-center min-w-0">
         {activeTab === 'test' && (
           <div className="w-full">
             {completedSession ? (
@@ -258,7 +261,14 @@ function MainApp() {
             }}
           />
         )}
-      </main>
+        </main>
+
+        {/* Right Full-Fill Sidebar Ad (Fills the entire right red-bordered space) */}
+        <RightAdsterraSidebar />
+      </div>
+
+      {/* Mobile/Tablet Ad Banner */}
+      <MobileAdsterraBanner />
 
       {/* Footer */}
       <footer className="border-t border-slate-800/60 bg-slate-950/40 py-4 px-6 text-center text-xs font-mono text-slate-500">

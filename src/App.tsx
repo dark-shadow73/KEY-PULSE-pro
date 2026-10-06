@@ -10,6 +10,7 @@ import { UserProfileView } from './components/UserProfileView';
 import { CloudBackupModal } from './components/CloudBackupModal';
 import { SettingsModal } from './components/SettingsModal';
 import { LeftAdsterraSidebar, RightAdsterraSidebar, MobileAdsterraBanner } from './components/AdsterraSidebars';
+import { NativeBannerAd } from './components/NativeBannerAd';
 import { TypingSession, CustomText, AppSettings, ThemeName, Badge } from './types';
 import { storageService } from './services/storageService';
 import { evaluateBadges } from './data/achievements';
@@ -320,6 +321,9 @@ function MainApp() {
             }}
           />
         )}
+
+        {/* Adsterra Native Banner Unit */}
+        {!zenMode && <NativeBannerAd />}
         </main>
 
         {/* Right Full-Fill Sidebar Ad (Hidden in Zen Mode) */}

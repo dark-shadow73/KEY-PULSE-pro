@@ -13,17 +13,20 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { TypingSession } from '../types';
+import { KeyboardHeatmap } from './KeyboardHeatmap';
 
 interface ProgressDashboardProps {
   sessions: TypingSession[];
   onDeleteSession?: (id: string) => void;
   onExportBackup?: () => void;
+  onPracticeKeys?: (keys: string[]) => void;
 }
 
 export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   sessions,
   onDeleteSession,
-  onExportBackup
+  onExportBackup,
+  onPracticeKeys
 }) => {
   const [filterMode, setFilterMode] = useState<string>('all');
   const [chartMetric, setChartMetric] = useState<'wpm' | 'cpm' | 'accuracy'>('wpm');
@@ -316,6 +319,12 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
           </div>
         )}
       </div>
+
+      {/* Keyboard Keystroke & Error Distribution Heatmap */}
+      <KeyboardHeatmap
+        sessions={sessions}
+        onPracticeKeys={onPracticeKeys}
+      />
 
       {/* Recent Sessions Table */}
       <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4">

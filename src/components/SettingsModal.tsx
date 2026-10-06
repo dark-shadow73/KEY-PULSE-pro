@@ -50,6 +50,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         <div className="space-y-5 text-xs font-mono">
+          {/* Zen Mode Setting */}
+          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-200 font-bold">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                Zen Mode (Distraction-Free)
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!settings.zenMode}
+                  onChange={e => onUpdateSettings({ zenMode: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-400"></div>
+              </label>
+            </div>
+            <p className="text-[11px] text-slate-400 font-normal">
+              Hides navigation bar, partner ads, and distracting elements while practicing. Press <kbd className="px-1 py-0.5 rounded bg-slate-800 text-amber-400 font-mono">Alt+Z</kbd> anytime.
+            </p>
+          </div>
+
           {/* Sound Profile */}
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">

@@ -51,6 +51,23 @@ function MainApp() {
   // Modals
   const [cloudBackupOpen, setCloudBackupOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [zenMode, setZenMode] = useState<boolean>(() => settings.zenMode || false);
+
+  // Global shortcut to toggle Zen Mode (Alt+Z)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        setZenMode(prev => {
+          const next = !prev;
+          handleUpdateSettings({ zenMode: next });
+          return next;
+        });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Load initial local data
   useEffect(() => {
@@ -145,33 +162,60 @@ function MainApp() {
 
   return (
     <div className={`min-h-screen ${themeConfig.bg} ${themeConfig.textMain} flex flex-col font-sans transition-colors duration-200`}>
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={tab => {
-          setActiveTab(tab);
-          if (tab === 'test') {
+      {/* Floating Zen Mode Exit Chip */}
+      {zenMode && (
+        <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-3 duration-200">
+          <button
+            onClick={() => {
+              setZenMode(false);
+              handleUpdateSettings({ zenMode: false });
+            }}
+            className="px-4 py-2 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-amber-400 border border-slate-700/80 shadow-2xl flex items-center gap-2.5 text-xs font-mono backdrop-blur-md transition-all group"
+            title="Exit Zen Mode (Alt+Z)"
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
+            <span className="font-bold">Zen Mode Active</span>
+            <span className="text-[11px] text-slate-500 group-hover:text-slate-300">· [Alt+Z] Exit ✕</span>
+          </button>
+        </div>
+      )}
+
+      {/* Navigation Bar (Hidden in Zen Mode) */}
+      {!zenMode && (
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={tab => {
+            setActiveTab(tab);
+            if (tab === 'test') {
+              setCompletedSession(null);
+            }
+          }}
+          currentTheme={settings.theme}
+          setTheme={t => handleUpdateSettings({ theme: t })}
+          soundEnabled={settings.soundEnabled}
+          setSoundEnabled={val => handleUpdateSettings({ soundEnabled: val })}
+          onOpenCloudBackup={() => setCloudBackupOpen(true)}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onResetTest={() => {
             setCompletedSession(null);
-          }
-        }}
-        currentTheme={settings.theme}
-        setTheme={t => handleUpdateSettings({ theme: t })}
-        soundEnabled={settings.soundEnabled}
-        setSoundEnabled={val => handleUpdateSettings({ soundEnabled: val })}
-        onOpenCloudBackup={() => setCloudBackupOpen(true)}
-        onOpenSettings={() => setSettingsOpen(true)}
-        onResetTest={() => {
-          setCompletedSession(null);
-          setCustomPracticeText(null);
-        }}
-      />
+            setCustomPracticeText(null);
+          }}
+          zenMode={zenMode}
+          onToggleZenMode={() => {
+            const next = !zenMode;
+            setZenMode(next);
+            handleUpdateSettings({ zenMode: next });
+          }}
+        />
+      )}
 
       {/* 3-Column Layout with Full-Fill Left & Right Adsterra Sidebars on Desktop */}
       <div className="flex-1 w-full max-w-[1920px] mx-auto flex items-start justify-center px-3 sm:px-4 xl:px-6 gap-4 2xl:gap-6 relative">
-        {/* Left Full-Fill Sidebar Ad (Fills the entire left red-bordered space) */}
-        <LeftAdsterraSidebar />
+        {/* Left Full-Fill Sidebar Ad (Hidden in Zen Mode) */}
+        {!zenMode && <LeftAdsterraSidebar />}
 
         {/* Central Application Workspace */}
-        <main className="w-full max-w-4xl 2xl:max-w-5xl shrink-0 mx-auto py-6 sm:py-8 flex flex-col items-center justify-center min-w-0">
+        <main className={`w-full max-w-4xl 2xl:max-w-5xl shrink-0 mx-auto ${zenMode ? 'py-12 sm:py-20' : 'py-6 sm:py-8'} flex flex-col items-center justify-center min-w-0 transition-all`}>
         {activeTab === 'test' && (
           <div className="w-full">
             {completedSession ? (
@@ -224,6 +268,12 @@ function MainApp() {
                     setCustomPracticeText(content);
                     setCustomPracticeTitle(title);
                   }}
+                  zenMode={zenMode}
+                  onToggleZenMode={() => {
+                    const next = !zenMode;
+                    setZenMode(next);
+                    handleUpdateSettings({ zenMode: next });
+                  }}
                 />
               </div>
             )}
@@ -235,6 +285,15 @@ function MainApp() {
             sessions={sessions}
             onDeleteSession={handleDeleteSession}
             onExportBackup={() => setCloudBackupOpen(true)}
+            onPracticeKeys={(keys) => {
+              const sampleWords = ['packet', 'query', 'syntax', 'browse', 'keyboard', 'focus', 'accuracy', 'velocity', 'system', 'zenith', 'pulse', 'effort'];
+              const relevant = sampleWords.filter(w => keys.some(k => w.toLowerCase().includes(k.toLowerCase())));
+              const drillText = (relevant.length >= 4 ? relevant : sampleWords).join(' ') + ' ' + keys.map(k => `${k}${k} ${k}e ${k}a`).join(' ');
+              setCustomPracticeText(drillText);
+              setCustomPracticeTitle(`Target Drill (${keys.map(k => k.toUpperCase()).join(', ')})`);
+              setCompletedSession(null);
+              setActiveTab('test');
+            }}
           />
         )}
 
@@ -263,29 +322,33 @@ function MainApp() {
         )}
         </main>
 
-        {/* Right Full-Fill Sidebar Ad (Fills the entire right red-bordered space) */}
-        <RightAdsterraSidebar />
+        {/* Right Full-Fill Sidebar Ad (Hidden in Zen Mode) */}
+        {!zenMode && <RightAdsterraSidebar />}
       </div>
 
-      {/* Mobile/Tablet Ad Banner */}
-      <MobileAdsterraBanner />
+      {/* Mobile/Tablet Ad Banner (Hidden in Zen Mode) */}
+      {!zenMode && <MobileAdsterraBanner />}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/60 bg-slate-950/40 py-4 px-6 text-center text-xs font-mono text-slate-500">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <span>KeyPulse Pro</span>
-            <span>·</span>
-            <span>Real-time WPM/CPM Telemetry</span>
-            <span>·</span>
-            <span>Encrypted Cloud Sync</span>
-          </div>
+      {/* Footer (Hidden in Zen Mode) */}
+      {!zenMode && (
+        <footer className="border-t border-slate-800/60 bg-slate-950/40 py-4 px-6 text-center text-xs font-mono text-slate-500">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <span>KeyPulse Pro</span>
+              <span>·</span>
+              <span>Real-time WPM/CPM Telemetry</span>
+              <span>·</span>
+              <span>Encrypted Cloud Sync</span>
+            </div>
 
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>Press <kbd className="px-1 py-0.5 rounded bg-slate-800 text-slate-400">Esc</kbd> anytime to restart</span>
+            <div className="flex items-center gap-4 text-[11px]">
+              <span>Press <kbd className="px-1 py-0.5 rounded bg-slate-800 text-slate-400">Esc</kbd> anytime to restart</span>
+              <span>·</span>
+              <span><kbd className="px-1 py-0.5 rounded bg-slate-800 text-slate-400">Alt+Z</kbd> Zen Mode</span>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       {/* Modals */}
       <CloudBackupModal

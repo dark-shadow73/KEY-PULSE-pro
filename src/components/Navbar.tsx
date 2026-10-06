@@ -32,6 +32,8 @@ interface NavbarProps {
   onOpenCloudBackup: () => void;
   onOpenSettings: () => void;
   onResetTest?: () => void;
+  zenMode?: boolean;
+  onToggleZenMode?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -43,7 +45,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   setSoundEnabled,
   onOpenCloudBackup,
   onOpenSettings,
-  onResetTest
+  onResetTest,
+  zenMode = false,
+  onToggleZenMode
 }) => {
   const { user, syncStatus } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -142,6 +146,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right utility toolbar */}
         <div className="flex items-center gap-2">
+          {/* Zen Mode Toggle */}
+          {onToggleZenMode && (
+            <button
+              onClick={onToggleZenMode}
+              title="Zen Mode: Hide navigation and sidebars [Alt+Z]"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 focus:outline-none border ${
+                zenMode
+                  ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-md shadow-amber-400/20'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border-slate-800'
+              }`}
+              aria-label="Toggle Zen Mode"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline font-semibold">Zen</span>
+            </button>
+          )}
+
           {/* Quick Sound Toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}

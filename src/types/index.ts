@@ -27,6 +27,7 @@ export interface TypingSession {
   timestamp: string; // ISO string
   telemetryHistory?: SecondTelemetry[];
   missedCharacters?: Record<string, number>;
+  charFrequency?: Record<string, number>;
 }
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'diamond' | 'mythic';
@@ -109,4 +110,5 @@ export interface AppSettings {
   showLiveAccuracy: boolean;
   quickRestartKey: boolean;
   fontSize: 'small' | 'medium' | 'large';
+  zenMode?: boolean;
 }

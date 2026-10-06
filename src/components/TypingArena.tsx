@@ -41,6 +41,8 @@ interface TypingArenaProps {
   savedCustomTexts?: CustomText[];
   onAddCustomText?: (text: CustomText) => void;
   onLoadCustomText?: (content: string, title: string) => void;
+  zenMode?: boolean;
+  onToggleZenMode?: () => void;
 }
 
 export const TypingArena: React.FC<TypingArenaProps> = ({
@@ -51,7 +53,9 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
   onClearCustomOverride,
   savedCustomTexts = [],
   onAddCustomText,
-  onLoadCustomText
+  onLoadCustomText,
+  zenMode = false,
+  onToggleZenMode
 }) => {
   // Test configuration
   const [mode, setMode] = useState<TestMode>('time');
@@ -105,6 +109,7 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
   // Tracking data
   const telemetryHistoryRef = useRef<SecondTelemetry[]>([]);
   const missedCharsRef = useRef<Record<string, number>>({});
+  const charFrequencyRef = useRef<Record<string, number>>({});
   const timerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const arenaContainerRef = useRef<HTMLDivElement | null>(null);
@@ -269,7 +274,8 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
       category: categoryRef.current,
       timestamp: new Date().toISOString(),
       telemetryHistory: [...telemetryHistoryRef.current],
-      missedCharacters: { ...missedCharsRef.current }
+      missedCharacters: { ...missedCharsRef.current },
+      charFrequency: { ...charFrequencyRef.current }
     };
 
     // Defer callback to next tick to avoid updating parent component during child render/updater
@@ -363,6 +369,11 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
       const newCharIdx = val.length - 1;
       const expected = targetText[newCharIdx];
       const actual = val[newCharIdx];
+
+      if (actual) {
+        const key = actual.toLowerCase();
+        charFrequencyRef.current[key] = (charFrequencyRef.current[key] || 0) + 1;
+      }
 
       if (expected && actual !== expected) {
         setErrorCount(prev => prev + 1);
@@ -566,6 +577,21 @@ export const TypingArena: React.FC<TypingArenaProps> = ({
             <Upload className="w-3.5 h-3.5" />
             Custom / PDF
           </button>
+
+          {onToggleZenMode && (
+            <button
+              onClick={onToggleZenMode}
+              title="Zen Mode: Hide all UI distractions [Alt+Z]"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-medium transition-all ${
+                zenMode
+                  ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Zen
+            </button>
+          )}
         </div>
 
         {/* Dynamic sub-options based on mode */}
